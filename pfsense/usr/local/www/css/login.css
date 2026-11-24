@@ -1,0 +1,426 @@
+@import url("/css/logo.css");
+
+/* INPUTS MODERNIZADOS */
+input[type="text"], 
+input[type="password"],
+input[type="email"], 
+input[type="number"],
+input[type="search"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 8px 0;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f9fafb;
+    font-size: 14px;
+    color: #111827;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Foco nos inputs */
+input[type="text"]:focus, 
+input[type="password"]:focus,
+input[type="email"]:focus, 
+input[type="number"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    background-color: #fff;
+}
+
+#footertext {
+    background: linear-gradient(135deg, #2d3748, #1a202c);
+    color: white;
+    padding: 12px 0;
+    font-size: 14px;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#footertext p {
+    margin: 0;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#footertext a {
+    color: #a0aec0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+#footertext a:hover {
+    color: #ffffff;
+    background-color: rgba(67, 97, 238, 0.2);
+    transform: translateY(-1px);
+}
+
+#footertext a::after {
+    content: "↗";
+    font-size: 0.8em;
+    margin-left: 4px;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+
+#footertext a:hover::after {
+    opacity: 1;
+    transform: translate(2px, -2px);
+}
+
+/* Ícone de coração para o copyright */
+#footertext p::before {
+    content: "ByDill";
+    color: #ef4444;
+    margin-right: 4px;
+    font-size: 0.9em;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    #footertext {
+        padding: 10px 0;
+        font-size: 12px;
+    }
+    
+    #footertext p {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    #footertext a {
+        padding: 2px 4px;
+    }
+}
+
+/* Inputs específicos da página de login (mantendo seu estilo original com melhorias) */
+form.login input[type="text"], 
+form.login input[type="password"] {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid rgba(255,255,255,0.7);
+    border-radius: 0;
+    color: white;
+    padding: 12px 5px;
+    box-shadow: none;
+}
+
+form.login input[type="text"]:focus, 
+form.login input[type="password"]:focus {
+    border-bottom-color: white;
+    box-shadow: 0 2px 0 0 rgba(255,255,255,0.3);
+}
+
+/* BOTÕES MODERNIZADOS */
+input[type="submit"],
+input[type="button"],
+button,
+.btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Botão primário (azul) */
+input[type="submit"],
+input[type="button"].btn-primary,
+button.btn-primary,
+.btn-primary {
+    background-color: #4361ee;
+    color: white;
+    box-shadow: 0 2px 5px rgba(67, 97, 238, 0.3);
+}
+
+input[type="submit"]:hover,
+input[type="button"].btn-primary:hover,
+button.btn-primary:hover,
+.btn-primary:hover {
+    background-color: #3a56e8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+input[type="submit"]:active,
+input[type="button"].btn-primary:active,
+button.btn-primary:active,
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 3px rgba(67, 97, 238, 0.3);
+}
+
+/* Botão de login específico */
+form.login input[type="submit"] {
+    background-color: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid white;
+    margin-top: 30px;
+    transition: all 0.3s ease;
+}
+
+form.login input[type="submit"]:hover {
+    background-color: white;
+    color: #4361ee;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Placeholders modernizados */
+::placeholder {
+    color: #9ca3af;
+    opacity: 1;
+}
+
+/* Autocomplete estilizado */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset;
+    transition: background-color 5000s ease-in-out 0s;
+    border-bottom: 2px solid white;
+}
+body, html {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    width: 100%;
+}
+
+header {
+}
+
+#headerrow {
+    position: fixed;
+    height: 90px;
+    top: 0;
+    width: 100%;
+    background-color: white;
+}
+
+.pagebody {
+    position: absolute;
+    top:90px;
+    bottom:25px;
+    width: 100%;
+    color: white;
+}
+
+.pagebodywarn {
+    position: absolute;
+    top:140px;
+    bottom:25px;
+    width: 100%;
+    color: white;
+}
+
+.nowarning {
+	height: 80px;
+	padding-top: 10px;
+}
+
+/* Estilo simplificado para o hostname */
+.nowarning.msgbox.text-center {
+    padding: 10px;
+    margin: 0 auto;
+}
+
+#hostspan h4 {
+    color: #2d3748; /* Cor escura moderna */
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 18px;
+    padding: 8px 15px;
+    display: inline-block;
+    background-color: #f8fafc; /* Fundo claro */
+    border-radius: 6px;
+    border: 1px solid #e2e8f0; /* Borda sutil */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Versão mobile */
+@media (max-width: 768px) {
+    #hostspan h4 {
+        font-size: 1.1rem;
+        padding: 6px 12px;
+    }
+}
+
+.msgbox {
+	padding-right: 60px;
+	padding-top: 25px;
+}
+
+@media only screen and (max-width : 768px) {
+    /* only size 'xs' and below */
+    #headerrow {
+        height: 100px;
+    }
+
+    .pagebody {
+    	top: 100px;
+    }
+
+    .pagebody2 {
+		top: 250px;
+    }
+
+    .nowarning {
+		height: 60px;
+	}
+
+	.msgbox {
+		padding-right: 0px;
+		padding-top: 0px;
+	}
+
+	#hostspan {
+		text-align: center;
+	}
+}
+
+#footertext {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #212121;
+    color: white;
+    text-align: center;
+}
+
+.loginCont {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 55%;
+    width: 80%;
+    background: #0000006b;
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    border-radius: 10px;
+}
+
+.error-panel a {
+	color: white;
+}
+p.form-title
+{
+    font-family: 'Open Sans' , sans-serif;
+    font-size: 20px;
+    font-weight: 500;
+    text-align: center;
+    color: #FFFFFF;
+    margin-top: 5%;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+form.login
+{
+    max-width: 270px;
+    margin: 0 auto 20px auto;
+margin-top: 90px;
+}
+
+form.login input[type="text"], form.login input[type="password"]
+{
+    width: 100%;
+    margin: 0;
+    padding: 10px 10px;
+    background: 0;
+    border: 0;
+    border-bottom: 1px solid #FFFFFF;
+    outline: 0;
+    font-style: italic;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    color: #FFFFFF;
+    outline: 0;
+}
+
+form.login input[type="submit"]
+{
+    width: 60%;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-top: 36px;
+    outline: 0;
+    cursor: pointer;
+    letter-spacing: 1px;
+    display: block;
+    margin : 0 auto;
+    margin-top: 36px;
+}
+
+form.login input[type="submit"]:hover
+{
+    transition: background-color 0.5s ease;
+}
+
+form.login label, form.login a
+{
+    font-size: 12px;
+    font-weight: 400;
+    color: #FFFFFF;
+}
+
+form.login a
+{
+    transition: color 0.5s ease;
+}
+
+form.login a:hover
+{
+    color: #2ecc71;
+}
+
+.logoCol {
+    height: 100%;
+}
+
+#logodiv svg#logo {
+    width: 240px;
+    height: 100%;
+}
+
+/** Re-style web-kit browser autocomplete boxes (Fixes Chrome's ugly yellow background) **/
+@-webkit-keyframes autofill {
+    to {
+        color: white;
+        background: transparent;
+    }
+}
+
+input:-webkit-autofill {
+    -webkit-animation-name: autofill;
+    -webkit-animation-fill-mode: both;
+}

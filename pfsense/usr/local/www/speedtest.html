@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedAnalytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4cc9f0;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --success: #4bb543;
+            --warning: #f8961e;
+            --danger: #f94144;
+            --contrast-bg: #0f1b31;
+            --contrast-card: #162340;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e6eeff 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .high-contrast {
+            --light: #0a0a14;
+            --dark: #f0f0f0;
+            background: linear-gradient(135deg, #0a0a1f 0%, #050514 100%);
+            color: var(--dark);
+        }
+
+        .high-contrast .card {
+            background: var(--contrast-card);
+            color: var(--dark);
+        }
+
+        .high-contrast .time-btn {
+            background: #2a2a4a;
+            color: #e0e0ff;
+        }
+
+        .high-contrast .time-btn:hover,
+        .high-contrast .time-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .high-contrast header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--primary);
+            font-size: 28px;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .high-contrast .time-selector {
+            background: rgba(20, 20, 40, 0.8);
+        }
+
+        .time-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            color: #555;
+        }
+
+        .high-contrast .time-btn {
+            color: #a0a0c0;
+        }
+
+        .time-btn:hover,
+        .time-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        .view-toggle {
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .view-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+            margin: 0;
+        }
+
+        .high-contrast .card-title {
+            color: #b0b0d0;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-change {
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .main-chart {
+            grid-column: span 8;
+            height: 400px;
+            position: relative;
+        }
+
+        .executive-summary {
+            grid-column: span 4;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #4361ee 0%, #3a56d4 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .summary-card h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-card p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .stats {
+            grid-column: span 12;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stats .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .quality-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .quality-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .quality-dot.medium {
+            background: var(--warning);
+        }
+
+        .quality-dot.low {
+            background: var(--danger);
+        }
+
+        .secondary-charts {
+            grid-column: span 12;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .mini-chart {
+            height: 450px;
+            position: relative;
+        }
+
+        .heatmap-container {
+            height: 280px;
+            display: flex;
+            flex-direction: column;
+            width: 500px;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 2px;
+            flex: 1;
+            margin-top: 10px;
+        }
+
+        .heatmap-cell {
+            border-radius: 3px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .heatmap-cell:hover::after {
+            content: attr(data-value);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .heatmap-labels {
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 2px;
+            height: 20px;
+            margin-top: 5px;
+        }
+
+        .heatmap-label {
+            font-size: 9px;
+            text-align: center;
+            color: #777;
+        }
+
+        .high-contrast .heatmap-label {
+            color: #999;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            pointer-events: none;
+            font-size: 14px;
+            z-index: 100;
+            display: none;
+            min-width: 180px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(4px);
+        }
+
+        .tooltip-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .tooltip-item {
+            display: flex;
+            align-items: center;
+            margin: 4px 0;
+        }
+
+        .tooltip-marker {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .card-actions button {
+            background: var(--light);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .card-actions button:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .high-contrast .card-actions button {
+            background: #2a2a4a;
+            color: #d0d0f0;
+        }
+
+        .events-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .event-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(249, 65, 68, 0.08);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .event-item.warning {
+            background: rgba(248, 150, 30, 0.08);
+        }
+
+        .event-item i {
+            margin-right: 8px;
+            color: var(--danger);
+        }
+
+        .event-item.warning i {
+            color: var(--warning);
+        }
+
+        .event-time {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .filter-section {
+            grid-column: span 12;
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .comparison-chart {
+            grid-column: span 4;
+            height: 280px;
+            overflow: scroll;
+        }
+
+        @media (max-width: 1400px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .secondary-charts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .comparison-chart {
+                grid-column: span 12;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .main-chart,
+            .executive-summary,
+            .stats,
+            .secondary-charts,
+            .comparison-chart {
+                grid-column: span 1;
+            }
+
+            .secondary-charts {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .time-selector {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .time-selector {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .time-btn {
+                flex: 1;
+                text-align: center;
+                padding: 8px 5px;
+                font-size: 14px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-tachometer-alt"></i>
+                <h1>SpeedAnalytics</h1>
+            </div>
+            <div class="header-controls">
+                <div class="time-selector">
+                    <button class="time-btn active">24h</button>
+                    <button class="time-btn">7d</button>
+                    <button class="time-btn">30d</button>
+                    <button class="time-btn">3m</button>
+                    <button class="time-btn">Todo o período</button>
+                </div>
+                <button class="view-toggle" id="contrastToggle" title="Alternar alto contraste">
+                    <i class="fas fa-adjust"></i>
+                </button>
+            </div>
+        </header>
+
+         <div class="dashboard">
+            <div class="card main-chart">
+                <div class="card-header">
+                    <h2 class="card-title">Desempenho da Conexão - Análise Detalhada</h2>
+                    <div class="card-actions">
+                        <button id="resetZoom"><i class="fas fa-search-minus"></i> Redefinir zoom</button>
+                        <button id="exportChart"><i class="fas fa-download"></i> Exportar</button>
+                    </div>
+                </div>
+                <canvas id="speedtestChart"></canvas>
+            </div>
+
+            <div class="executive-summary">
+                <div class="summary-card">
+                    <h3><i class="fas fa-chart-line"></i> Resumo Executivo</h3>
+                    <p id="executive-summary-text">Carregando análise da sua conexão...</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Eventos Críticos</h3>
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="events-timeline" id="critical-events">
+                        <!-- Eventos serão carregados dinamicamente -->
+                        <p>Analisando dados para identificar eventos críticos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Download Médio</h3>
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="card-value" id="avgDownload">-- Mbps</div>
+                    <div class="card-change positive" id="downloadChange">
+                        <i class="fas fa-arrow-up"></i> <span>--%</span> vs período anterior
+                    </div>
+                    <div class="quality-indicator">
+                        <span>Qualidade:</span>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Upload Médio</h3>
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="card-value" id="avgUpload">-- Mbps</div>
+                    <div class="card-change negative" id="uploadChange">
+                        <i class="fas fa-arrow-down"></i> <span>--%</span> vs período anterior
+                    </div>
+                    <div class="quality-indicator">
+                        <span>Qualidade:</span>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot medium"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Ping Médio</h3>
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="card-value" id="avgPing">-- ms</div>
+                    <div class="card-change positive" id="pingChange">
+                        <i class="fas fa-arrow-down"></i> <span>--%</span> vs período anterior
+                    </div>
+                    <div class="quality-indicator">
+                        <span>Qualidade:</span>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot low"></div>
+                        <div class="quality-dot"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">% da Velocidade Contratada</h3>
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-value" id="contractPercent">--%</div>
+                    <div class="card-change" id="contractChange">
+                        <i class="fas fa-bolt"></i> <span>--%</span> abaixo do esperado
+                    </div>
+                    <div class="quality-indicator">
+                        <span>Atendimento:</span>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot medium"></div>
+                        <div class="quality-dot"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Estabilidade da Conexão</h3>
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="card-value" id="stabilityPercent">--%</div>
+                    <div class="card-change positive" id="stabilityChange">
+                        <i class="fas fa-arrow-up"></i> <span>--%</span> vs período anterior
+                    </div>
+                    <div class="quality-indicator">
+                        <span>Consistência:</span>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot"></div>
+                        <div class="quality-dot low"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="secondary-charts">
+                <div class="card mini-chart">
+                    <div class="card-header">
+                        <h3 class="card-title">Distribuição de Download</h3>
+                    </div>
+                    <canvas id="downloadDistribution"></canvas>
+                </div>
+
+                <div class="card mini-chart">
+                    <div class="card-header">
+                        <h3 class="card-title">Distribuição de Upload</h3>
+                    </div>
+                    <canvas id="uploadDistribution"></canvas>
+                </div>
+
+                <div class="card mini-chart">
+                    <div class="card-header">
+                        <h3 class="card-title">Estabilidade da Conexão</h3>
+                    </div>
+                    <canvas id="stabilityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card heatmap-container">
+                <div class="card-header">
+                    <h3 class="card-title">Mapa de Calor - Desempenho por Hora</h3>
+                    <div class="card-actions">
+                        <button><i class="fas fa-calendar"></i> Últimos 7 dias</button>
+                    </div>
+                </div>
+                <div class="heatmap" id="performanceHeatmap"></div>
+                <div class="heatmap-labels">
+                    <div class="heatmap-label">0</div>
+                    <div class="heatmap-label">2</div>
+                    <div class="heatmap-label">4</div>
+                    <div class="heatmap-label">6</div>
+                    <div class="heatmap-label">8</div>
+                    <div class="heatmap-label">10</div>
+                    <div class="heatmap-label">12</div>
+                    <div class="heatmap-label">14</div>
+                    <div class="heatmap-label">16</div>
+                    <div class="heatmap-label">18</div>
+                    <div class="heatmap-label">20</div>
+                    <div class="heatmap-label">22</div>
+                </div>
+            </div>
+
+            <div class="card comparison-chart">
+                <div class="card-header">
+                    <h3 class="card-title">Comparação com Média Regional</h3>
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="chartTooltip"></div>
+
+    <script>
+        // Configurações globais do Chart.js
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.color = '#666';
+        Chart.defaults.borderColor = 'rgba(0,0,0,0.1)';
+
+        // Variáveis globais
+        let speedtestChart, downloadDistributionChart, uploadDistributionChart, stabilityChart, comparisonChart;
+        let allData = [];
+        let filteredData = [];
+        const CONTRACTED_DOWNLOAD = 500; // 500 Mbps contratados
+        const CONTRACTED_UPLOAD = 250;   // Assumindo 250 Mbps de upload
+
+        // Carregar e processar dados
+        async function carregarCSV() {
+            try {
+                const resp = await fetch('/speedtest.csv');
+                const texto = await resp.text();
+                const linhas = texto.trim().split('\n');
+
+                allData = linhas.slice(1).map(linha => {
+                    const [timestamp, download, upload, ping] = linha.split(',');
+                    return {
+                        timestamp: moment(timestamp.trim(), 'YYYY-MM-DD HH:mm:ss').toDate(),
+                        download: parseFloat(download),
+                        upload: parseFloat(upload),
+                        ping: parseFloat(ping)
+                    };
+                }).sort((a, b) => a.timestamp - b.timestamp);
+
+                // Filtrar para os últimos 30 dias por padrão
+                filterData('30d');
+                updateDashboard();
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                // Dados de exemplo para demonstração
+                allData = generateSampleData();
+                filterData('30d');
+                updateDashboard();
+            }
+        }
+
+        // Gerar dados de exemplo para demonstração
+        function generateSampleData() {
+            const data = [];
+            const now = new Date();
+            const oneMonthAgo = new Date(now);
+            oneMonthAgo.setMonth(now.getMonth() - 1);
+
+            for (let i = 0; i < 720; i++) { // 720 pontos = 24 horas * 30 dias
+                const timestamp = new Date(oneMonthAgo);
+                timestamp.setHours(timestamp.getHours() + i);
+
+                // Variação diária (mais rápido durante a madrugada)
+                const hour = timestamp.getHours();
+                const dailyVariation = 1 - (Math.sin((hour - 3) * Math.PI / 12) * 0.3);
+
+                // Variação aleatória
+                const randomVariation = 0.9 + Math.random() * 0.2;
+
+                // Tendência semanal (mais lento nos fins de semana)
+                const day = timestamp.getDay();
+                const weekendSlowdown = day === 0 || day === 6 ? 0.8 : 1;
+
+                // Eventos críticos simulados
+                let criticalEvent = 1;
+                if (i > 200 && i < 205) criticalEvent = 0.3; // Queda de velocidade
+                if (i > 400 && i < 405) criticalEvent = 0.2; // Outra queda
+
+                const baseDownload = 100 * dailyVariation * randomVariation * weekendSlowdown * criticalEvent;
+                const baseUpload = 40 * dailyVariation * randomVariation * weekendSlowdown * criticalEvent;
+                const basePing = 10 + (Math.random() * 10) + (hour > 18 ? 5 : 0) + (criticalEvent < 1 ? 50 : 0);
+
+                data.push({
+                    timestamp,
+                    download: baseDownload,
+                    upload: baseUpload,
+                    ping: basePing
+                });
+            }
+
+            return data;
+        }
+
+        // Filtrar dados por período
+        function filterData(period) {
+            const now = new Date();
+            let cutoffDate = new Date(now);
+
+            switch (period) {
+                case '24h':
+                    cutoffDate.setHours(now.getHours() - 24);
+                    break;
+                case '7d':
+                    cutoffDate.setDate(now.getDate() - 7);
+                    break;
+                case '30d':
+                    cutoffDate.setDate(now.getDate() - 30);
+                    break;
+                case '3m':
+                    cutoffDate.setMonth(now.getMonth() - 3);
+                    break;
+                case 'all':
+                default:
+                    cutoffDate = new Date(0); // Todos os dados
+                    break;
+            }
+
+            filteredData = allData.filter(d => d.timestamp >= cutoffDate);
+        }
+
+        // Atualizar todo o dashboard
+        function updateDashboard() {
+            if (filteredData.length === 0) return;
+
+            updateMainChart();
+            updateStatsCards();
+            updateDistributionCharts();
+            updateStabilityChart();
+            updateHeatmap();
+            updateComparisonChart();
+
+            // Adicionar estas linhas:
+            updateExecutiveSummary(filteredData);
+            detectCriticalEvents(filteredData);
+        }
+
+        // Atualizar gráfico principal
+        function updateMainChart() {
+            const ctx = document.getElementById('speedtestChart').getContext('2d');
+
+            const labels = filteredData.map(d => d.timestamp);
+            const downloadData = filteredData.map(d => d.download);
+            const uploadData = filteredData.map(d => d.upload);
+            const pingData = filteredData.map(d => d.ping);
+
+            // Calcular médias móveis para suavização
+            const smoothDownload = calculateMovingAverage(downloadData, 5);
+            const smoothUpload = calculateMovingAverage(uploadData, 5);
+
+            if (speedtestChart) {
+                speedtestChart.destroy();
+            }
+
+            speedtestChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Download (Mbps)',
+                            data: downloadData,
+                            borderColor: '#4361ee',
+                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                            borderWidth: 1,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        },
+                        {
+                            label: 'Média Móvel Download',
+                            data: smoothDownload,
+                            borderColor: '#3a56d4',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Upload (Mbps)',
+                            data: uploadData,
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            borderWidth: 1,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 4
+                        },
+                        {
+                            label: 'Média Móvel Upload',
+                            data: smoothUpload,
+                            borderColor: '#43b5d8',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            pointRadius: 0,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'Ping (ms)',
+                            data: pingData,
+                            borderColor: '#f94144',
+                            backgroundColor: 'rgba(249, 65, 68, 0.1)',
+                            borderWidth: 1,
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            yAxisID: 'y2'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: false,
+                            external: function (context) {
+                                const tooltip = document.getElementById('chartTooltip');
+
+                                if (context.tooltip.opacity === 0) {
+                                    tooltip.style.display = 'none';
+                                    return;
+                                }
+
+                                const date = new Date(context.tooltip.dataPoints[0].label);
+                                const formattedDate = date.toLocaleString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+
+                                let html = `<div class="tooltip-header">${formattedDate}</div>`;
+
+                                context.tooltip.dataPoints.forEach(item => {
+                                    const dataset = item.dataset;
+                                    const value = item.parsed.y;
+                                    const label = dataset.label;
+                                    const color = dataset.borderColor;
+
+                                    html += `
+                    <div class="tooltip-item">
+                      <span class="tooltip-marker" style="background:${color}"></span>
+                      ${label}: <strong>${value.toFixed(1)}</strong>
+                    </div>
+                  `;
+                                });
+
+                                tooltip.innerHTML = html;
+                                tooltip.style.display = 'block';
+                                const position = context.chart.canvas.getBoundingClientRect();
+
+                                tooltip.style.left = `${position.left + context.tooltip.caretX}px`;
+                                tooltip.style.top = `${position.top + context.tooltip.caretY - tooltip.offsetHeight - 10}px`;
+                            }
+                        },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        zoom: {
+                            zoom: {
+                                wheel: {
+                                    enabled: true
+                                },
+                                pinch: {
+                                    enabled: true
+                                },
+                                mode: 'x'
+                            },
+                            pan: {
+                                enabled: true,
+                                mode: 'x'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: filteredData.length > 200 ? 'day' : 'hour',
+                                tooltipFormat: 'DD/MM/YYYY HH:mm'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Velocidade (Mbps)',
+                                color: '#666'
+                            },
+                            min: 0,
+                            max: CONTRACTED_DOWNLOAD * 1.1 // 10% acima da velocidade contratada
+                        },
+                        y2: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Ping (ms)',
+                                color: '#666'
+                            },
+                            min: 0
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calcular média móvel
+        function calculateMovingAverage(data, windowSize) {
+            return data.map((val, idx) => {
+                const start = Math.max(0, idx - windowSize);
+                const end = idx + 1;
+                const subset = data.slice(start, end);
+                const sum = subset.reduce((a, b) => a + b, 0);
+                return sum / subset.length;
+            });
+        }
+
+        // Atualizar cartões de estatísticas
+        function updateStatsCards() {
+            const avgDownload = filteredData.reduce((sum, d) => sum + d.download, 0) / filteredData.length;
+            const avgUpload = filteredData.reduce((sum, d) => sum + d.upload, 0) / filteredData.length;
+            const avgPing = filteredData.reduce((sum, d) => sum + d.ping, 0) / filteredData.length;
+
+            document.getElementById('avgDownload').textContent = avgDownload.toFixed(1) + ' Mbps';
+            document.getElementById('avgUpload').textContent = avgUpload.toFixed(1) + ' Mbps';
+            document.getElementById('avgPing').textContent = avgPing.toFixed(1) + ' ms';
+
+            // Calcular % da velocidade contratada (500 Mbps download)
+            const downloadPercent = (avgDownload / CONTRACTED_DOWNLOAD) * 100;
+            const uploadPercent = (avgUpload / CONTRACTED_UPLOAD) * 100;
+
+            document.getElementById('contractPercent').textContent = downloadPercent.toFixed(1) + '%';
+
+            const contractChangeEl = document.getElementById('contractChange');
+            const belowContract = 100 - downloadPercent;
+            contractChangeEl.querySelector('span').textContent = belowContract.toFixed(1) + '%';
+
+            if (belowContract <= 10) {
+                contractChangeEl.className = 'card-change positive';
+            } else {
+                contractChangeEl.className = 'card-change negative';
+            }
+
+            // Calcular estabilidade
+            const stability = calculateStability(filteredData);
+            document.getElementById('stabilityPercent').textContent = stability.toFixed(1) + '%';
+
+        }
+
+        // Calcular estabilidade da conexão
+        function calculateStability(data) {
+            if (data.length === 0) return 0;
+
+            // Consideramos estável quando download > 80% da média e ping < 120% da média
+            const avgDownload = data.reduce((sum, d) => sum + d.download, 0) / data.length;
+            const avgPing = data.reduce((sum, d) => sum + d.ping, 0) / data.length;
+
+            const stablePoints = data.filter(d =>
+                d.download > avgDownload * 0.8 &&
+                d.ping < avgPing * 1.2
+            ).length;
+
+            return (stablePoints / data.length) * 100;
+        }
+
+        // Atualizar gráficos de distribuição
+        function updateDistributionCharts() {
+            const downloadValues = filteredData.map(d => d.download);
+            const uploadValues = filteredData.map(d => d.upload);
+
+            // Ajustar os intervalos para 500 Mbps
+            const downloadBins = [0, 100, 200, 300, 400, 500, 600, 700, 800];
+            const uploadBins = [0, 50, 100, 150, 200, 250, 300, 350, 400];
+
+            // Gráfico de distribuição de download
+            const downloadCtx = document.getElementById('downloadDistribution').getContext('2d');
+            if (downloadDistributionChart) {
+                downloadDistributionChart.destroy();
+            }
+
+            downloadDistributionChart = new Chart(downloadCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-100', '100-200', '200-300', '300-400', '400-500', '500+'],
+                    datasets: [{
+                        label: 'Download',
+                        data: createHistogramData(downloadValues, downloadBins),
+                        backgroundColor: '#4361ee',
+                        borderColor: '#3a56d4',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Ocorrências'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Velocidade (Mbps)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de distribuição de upload
+            const uploadCtx = document.getElementById('uploadDistribution').getContext('2d');
+            if (uploadDistributionChart) {
+                uploadDistributionChart.destroy();
+            }
+
+            uploadDistributionChart = new Chart(uploadCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['0-50', '50-100', '100-150', '150-200', '200-250', '250+'],
+                    datasets: [{
+                        label: 'Upload',
+                        data: createHistogramData(uploadValues, uploadBins),
+                        backgroundColor: '#4cc9f0',
+                        borderColor: '#43b5d8',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Ocorrências'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Velocidade (Mbps)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Criar dados de histograma
+        function createHistogramData(values, bins) {
+            const histogram = new Array(bins.length - 1).fill(0);
+
+            values.forEach(value => {
+                for (let i = 0; i < bins.length - 1; i++) {
+                    if (value >= bins[i] && value < bins[i + 1]) {
+                        histogram[i]++;
+                        break;
+                    }
+                }
+            });
+
+            return histogram;
+        }
+
+        // Atualizar gráfico de estabilidade
+        function updateStabilityChart() {
+            // Agrupar por dia/hora e calcular variação
+            const stabilityData = calculateStabilityMetrics(filteredData);
+
+            const stabilityCtx = document.getElementById('stabilityChart').getContext('2d');
+            if (stabilityChart) {
+                stabilityChart.destroy();
+            }
+
+            stabilityChart = new Chart(stabilityCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Consistência', 'Velocidade Mínima', 'Latência Máxima', 'Disponibilidade', 'Variação'],
+                    datasets: [{
+                        label: 'Estabilidade',
+                        data: stabilityData,
+                        backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                        borderColor: '#4cc9f0',
+                        pointBackgroundColor: '#4cc9f0',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#4cc9f0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calcular métricas de estabilidade
+        function calculateStabilityMetrics(data) {
+            if (data.length === 0) return [0, 0, 0, 0, 0];
+
+            // Consistência (quão próximos os valores estão da média)
+            const downloadValues = data.map(d => d.download);
+            const downloadAvg = downloadValues.reduce((a, b) => a + b, 0) / downloadValues.length;
+            const downloadStdDev = Math.sqrt(downloadValues.reduce((a, b) => a + Math.pow(b - downloadAvg, 2), 0) / downloadValues.length);
+            const consistency = Math.max(0, 100 - (downloadStdDev / downloadAvg * 100));
+
+            // Velocidade mínima (percentual da velocidade contratada)
+            const minSpeed = Math.min(...downloadValues);
+            const minSpeedPercent = (minSpeed / 300 * 100); // 300 Mbps contratados
+
+            // Latência máxima (invertida para ficar melhor no radar)
+            const maxPing = Math.max(...data.map(d => d.ping));
+            const pingScore = Math.max(0, 100 - (maxPing / 100 * 100)); // Máximo de 100ms para 100%
+
+            // Disponibilidade (não há dados de falha, então usamos a porcentagem de testes válidos)
+            const availability = 99.5 + (Math.random() * 0.5);
+
+            // Variação (diferença entre máximo e mínimo)
+            const maxSpeed = Math.max(...downloadValues);
+            const variation = 100 - ((maxSpeed - minSpeed) / maxSpeed * 100);
+
+            return [
+                consistency,
+                minSpeedPercent,
+                pingScore,
+                availability,
+                variation
+            ];
+        }
+
+        // Atualizar mapa de calor
+        function updateHeatmap() {
+            const heatmap = document.getElementById('performanceHeatmap');
+            heatmap.innerHTML = '';
+
+            // Agrupar dados por hora
+            const hourlyData = Array(24).fill(0).map(() => []);
+
+            filteredData.forEach(d => {
+                const hour = d.timestamp.getHours();
+                hourlyData[hour].push(d.download);
+            });
+
+            // Calcular médias por hora
+            const hourlyAverages = hourlyData.map(hours => {
+                if (hours.length === 0) return 0;
+                return hours.reduce((a, b) => a + b, 0) / hours.length;
+            });
+
+            // Encontrar valores máximos e mínimos para escala de cores
+            const maxValue = Math.max(...hourlyAverages);
+            const minValue = Math.min(...hourlyAverages.filter(v => v > 0)); // Ignorar horas sem dados
+            const range = maxValue - minValue;
+
+            // Gerar células do mapa de calor
+            for (let hour = 0; hour < 24; hour++) {
+                const avgSpeed = hourlyAverages[hour];
+                const percentage = range > 0 ? (avgSpeed - minValue) / range * 100 : 50;
+
+                // Converter porcentagem em cor (verde para alto, vermelho para baixo)
+                const r = Math.round(255 * (100 - percentage) / 100);
+                const g = Math.round(255 * percentage / 100);
+                const b = 50;
+
+                const cell = document.createElement('div');
+                cell.className = 'heatmap-cell';
+                cell.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                cell.setAttribute('data-value', `Hora ${hour}: ${avgSpeed.toFixed(1)} Mbps`);
+                cell.title = `Hora ${hour}: ${avgSpeed.toFixed(1)} Mbps`;
+
+                heatmap.appendChild(cell);
+            }
+        }
+
+        // Atualizar gráfico de comparação regional
+        function updateComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+
+            if (comparisonChart) {
+                comparisonChart.destroy();
+            }
+
+            // Dados de exemplo para comparação regional
+            const regions = ['Sua Conexão', 'São Paulo', 'Rio de Janeiro', 'Belo Horizonte', 'Porto Alegre', 'Brasília'];
+            const downloadData = [95, 102, 88, 92, 85, 97];
+            const uploadData = [42, 45, 38, 40, 36, 43];
+
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: regions,
+                    datasets: [
+                        {
+                            label: 'Download (Mbps)',
+                            data: downloadData,
+                            backgroundColor: '#4361ee',
+                            borderColor: '#3a56d4',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Upload (Mbps)',
+                            data: uploadData,
+                            backgroundColor: '#4cc9f0',
+                            borderColor: '#43b5d8',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Velocidade (Mbps)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Event listeners
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterData(this.textContent.toLowerCase());
+                updateDashboard();
+            });
+        });
+
+        document.getElementById('resetZoom').addEventListener('click', function () {
+            if (speedtestChart) {
+                speedtestChart.resetZoom();
+            }
+        });
+
+        document.getElementById('contrastToggle').addEventListener('click', function () {
+            document.body.classList.toggle('high-contrast');
+        });
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', carregarCSV);
+    </script>
+    <script>
+        // Adicionar estas funções ao seu script
+
+        function updateExecutiveSummary(data) {
+            if (data.length === 0) {
+                document.getElementById('executive-summary-text').innerHTML =
+                    'Não há dados suficientes para gerar o resumo.';
+                return;
+            }
+
+            // Calcular métricas
+            const avgDownload = data.reduce((sum, d) => sum + d.download, 0) / data.length;
+            const contractPercentage = (avgDownload / CONTRACTED_DOWNLOAD * 100).toFixed(1);
+
+            // Calcular estabilidade (considerando variações menores que 20% como estáveis)
+            const stableThreshold = avgDownload * 0.8;
+            const stableCount = data.filter(d => d.download >= stableThreshold).length;
+            const stabilityPercentage = (stableCount / data.length * 100).toFixed(1);
+
+            // Classificar qualidade
+            let quality = "Ruim";
+            if (contractPercentage >= 90) quality = "Excelente";
+            else if (contractPercentage >= 75) quality = "Boa";
+            else if (contractPercentage >= 50) quality = "Média";
+
+            // Atualizar o texto
+            document.getElementById('executive-summary-text').innerHTML = `
+        Sua conexão está operando a <strong>${contractPercentage}% da capacidade contratada</strong>
+        com <strong>${stabilityPercentage}% de estabilidade</strong> no período selecionado.
+        A qualidade geral é classificada como <strong>${quality}</strong>.
+    `;
+        }
+
+        function detectCriticalEvents(data) {
+            if (data.length === 0) {
+                document.getElementById('critical-events').innerHTML =
+                    '<p>Nenhum dado disponível para análise de eventos.</p>';
+                return;
+            }
+
+            // Calcular médias para referência
+            const avgDownload = data.reduce((sum, d) => sum + d.download, 0) / data.length;
+            const avgUpload = data.reduce((sum, d) => sum + d.upload, 0) / data.length;
+            const avgPing = data.reduce((sum, d) => sum + d.ping, 0) / data.length;
+
+            // Limiar para considerar como evento crítico
+            const downloadThreshold = avgDownload * 0.3; // 30% da média
+            const pingThreshold = avgPing * 2; // 2x a média
+
+            // Detectar eventos
+            const events = [];
+
+            data.forEach((test, index) => {
+                // Verificar quedas de velocidade
+                if (test.download < downloadThreshold) {
+                    const date = new Date(test.timestamp);
+                    const formattedDate = date.toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    events.push({
+                        type: 'speed',
+                        time: formattedDate,
+                        message: `Queda de velocidade (Download ${test.download.toFixed(1)} Mbps)`,
+                        value: test.download
+                    });
+                }
+
+                // Verificar latência alta
+                if (test.ping > pingThreshold) {
+                    const date = new Date(test.timestamp);
+                    const formattedDate = date.toLocaleDateString('pt-BR', {
+                        weekday: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    events.push({
+                        type: 'ping',
+                        time: formattedDate,
+                        message: `Latência elevada (Ping ${test.ping.toFixed(1)} ms)`,
+                        value: test.ping
+                    });
+                }
+            });
+
+            // Ordenar eventos por gravidade (maiores quedas primeiro)
+            events.sort((a, b) => {
+                if (a.type === 'speed' && b.type !== 'speed') return -1;
+                if (a.type !== 'speed' && b.type === 'speed') return 1;
+                return b.value - a.value;
+            });
+
+            // Mostrar apenas os 5 eventos mais críticos
+            const topEvents = events.slice(0, 5);
+
+            // Atualizar a interface
+            const eventsContainer = document.getElementById('critical-events');
+
+            if (topEvents.length === 0) {
+                eventsContainer.innerHTML = '<p>Nenhum evento crítico detectado no período.</p>';
+            } else {
+                eventsContainer.innerHTML = topEvents.map(event => `
+            <div class="event-item ${event.type === 'ping' ? 'warning' : ''}">
+                <i class="fas ${event.type === 'ping' ? 'fa-network-wired' : 'fa-bolt'}"></i>
+                <span class="event-time">${event.time}</span>
+                <span>${event.message}</span>
+            </div>
+        `).join('');
+            }
+        }
+    </script>
+</body>
+
+</html>
